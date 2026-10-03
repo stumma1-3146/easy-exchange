@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Easy Exchange — Book Exchange</title>
+    <style>
+      :root {
+        --bg: #f4f1ea;
+        --card: #fffcf7;
+        --ink: #1f2933;
+        --muted: #5c6670;
+        --line: #d9d1c3;
+        --accent: #1f5f4a;
+        --accent-hover: #164536;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Georgia, "Times New Roman", serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 1.5rem;
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      #search {
+        min-width: 16rem;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        font: inherit;
+      }
+
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 999px;
+        padding: 0.55rem 1rem;
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .btn:hover {
+        background: var(--accent-hover);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      main {
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 3rem;
+      }
+
+      h1 {
+        margin: 0 0 0.35rem;
+        font-size: 1.85rem;
+      }
+
+      .lede {
+        margin: 0 0 1.5rem;
+        color: var(--muted);
+      }
+
+      #empty {
+        display: none;
+        padding: 2rem;
+        text-align: center;
+        border: 1px dashed var(--line);
+        border-radius: 1rem;
+        background: var(--card);
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: 1rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .status {
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .card h2 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      dialog {
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        padding: 0;
+        width: min(28rem, calc(100% - 2rem));
+        background: var(--card);
+      }
+
+      dialog::backdrop {
+        background: rgba(31, 41, 51, 0.45);
+      }
+
+      form {
+        padding: 1.25rem;
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      label {
+        display: grid;
+        gap: 0.3rem;
+        font-size: 0.95rem;
+      }
+
+      input,
+      select,
+      textarea {
+        font: inherit;
+        padding: 0.5rem 0.65rem;
+        border: 1px solid var(--line);
+        border-radius: 0.5rem;
+        background: #fff;
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">Easy Exchange</div>
+      <div class="header-actions">
+        <label class="sr-only" for="search">Search books</label>
+        <input id="search" type="search" placeholder="Search title, author, or tag" />
+        <button class="btn" type="button" id="open-list">List a Book</button>
+      </div>
+    </header>
+
+    <main>
+      <h1>Books available to exchange</h1>
+      <p class="lede">Browse campus listings, then add a book of your own.</p>
+      <p id="empty">No books match that search. Try another title or author.</p>
+      <section class="grid" id="grid" aria-live="polite"></section>
+    </main>
+
+    <dialog id="list-dialog" aria-labelledby="dialog-title">
+      <form id="list-form" method="dialog">
+        <h2 id="dialog-title">List a Book</h2>
+        <label>
+          Title
+          <input name="title" required maxlength="120" />
+        </label>
+        <label>
+          Author
+          <input name="author" required maxlength="80" />
+        </label>
+        <label>
+          Condition
+          <select name="condition" required>
+            <option value="" disabled selected>Select condition</option>
+            <option>New</option>
+            <option>Like New</option>
+            <option>Good</option>
+            <option>Acceptable</option>
+          </select>
+        </label>
+        <label>
+          Course / subject tag
+          <input name="tag" placeholder="MATH 101" maxlength="40" />
+        </label>
+        <div class="form-actions">
+          <button class="btn btn-ghost" type="button" id="cancel-list">Cancel</button>
+          <button class="btn" type="submit">Publish listing</button>
+        </div>
+      </form>
+    </dialog>
+
+    <style>
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+
+    <script>
+      const books = [
+        {
+          title: "Calculus: Early Transcendentals",
+          author: "James Stewart",
+          condition: "Good",
+          tag: "MATH 101",
+        },
+        {
+          title: "Linear Algebra and Its Applications",
+          author: "David C. Lay",
+          condition: "Like New",
+          tag: "MATH 220",
+        },
+        {
+          title: "Operating System Concepts",
+          author: "Abraham Silberschatz",
+          condition: "Acceptable",
+          tag: "CS 330",
+        },
+      ];
+
+      const grid = document.getElementById("grid");
+      const empty = document.getElementById("empty");
+      const search = document.getElementById("search");
+      const dialog = document.getElementById("list-dialog");
+      const form = document.getElementById("list-form");
+
+      function matches(book, query) {
+        const q = query.trim().toLowerCase();
+        if (!q) return true;
+        return [book.title, book.author, book.tag, book.condition]
+          .join(" ")
+          .toLowerCase()
+          .includes(q);
+      }
+
+      function render() {
+        const visible = books.filter((book) => matches(book, search.value));
+        grid.replaceChildren();
+        empty.style.display = visible.length ? "none" : "block";
+        visible.forEach((book) => {
+          const card = document.createElement("article");
+          card.className = "card";
+          card.innerHTML = `
+            <span class="status">Available</span>
+            <h2></h2>
+            <p class="author"></p>
+            <p class="meta"></p>
+          `;
+          card.querySelector("h2").textContent = book.title;
+          card.querySelector(".author").textContent = book.author;
+          card.querySelector(".meta").textContent = book.tag
+            ? `${book.condition} · ${book.tag}`
+            : book.condition;
+          grid.append(card);
+        });
+      }
+
+      document.getElementById("open-list").addEventListener("click", () => {
+        dialog.showModal();
+      });
+
+      document.getElementById("cancel-list").addEventListener("click", () => {
+        dialog.close();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        books.unshift({
+          title: String(data.get("title")).trim(),
+          author: String(data.get("author")).trim(),
+          condition: String(data.get("condition")),
+          tag: String(data.get("tag") || "").trim(),
+        });
+        form.reset();
+        dialog.close();
+        render();
+      });
+
+      search.addEventListener("input", render);
+      render();
+    </script>
+  </body>
+</html>
